@@ -1,6 +1,6 @@
 import yfinance as yf
-import pandas as pd
-from  datetime import datetime
+import pandas   as pd
+from   datetime import datetime
 import holidays 
 import pandas_market_calendars as mcal
 
@@ -27,34 +27,34 @@ class MarketData:
 
     def check_date_continuity(self, market='NYSE', country='US'):
         """
-        Vérifie la continuité des dates dans un DataFrame financier.
-        Fournit des informations détaillées sur les dates manquantes :
-        - week-end
-        - jour férié
-        - fermeture exceptionnelle du marché
-        Affiche un message final si les dates manquantes sont cohérentes ou non.
+        Checks the continuity of dates in a financial DataFrame.
+        Provides detailed information on missing dates:
+        - weekend
+        - public holiday
+        - exceptional market closure
+        Displays a final message indicating whether the missing dates are consistent or not.
         """
         df = self.download_data()
         idx = df.index
 
-        print("\n--- Date verification ---")
+        print("\n Date verification ")
 
-        # Vérification des doublons
+        # Duplicate checking
         if idx.duplicated().sum() > 0:
             print(f"{idx.duplicated().sum()} duplicate dates")
         else:
             print("No duplicate dates")
 
-        # Vérification des NAs par ligne
+        # Verification of NAs by line
         missing_by_row = df.isna().sum(axis=1)
         print(f"Number of lines with internal NAs: {sum(missing_by_row > 0)}")
 
-        # Calendrier officiel de la bourse
+        # Official scholarship calendar
         cal = mcal.get_calendar(market.upper())
         schedule = cal.schedule(start_date=idx.min(), end_date=idx.max())
         market_open_dates = schedule.index
  
-        # Dates manquantes selon le calendrier de trading
+        # Missing dates according to the trading calendar
         missing = market_open_dates.difference(idx)
 
         inconsistent_count = 0  # compteur de fermetures inattendues
@@ -64,7 +64,7 @@ class MarketData:
         else:
             print(f"{len(missing)} missing dates on market open days:")
 
-        # Calendrier des jours fériés
+        # Holiday calendar
         if country.upper() == 'US':
             country_holidays = holidays.US()
         elif country.upper() == 'FR':
@@ -74,7 +74,7 @@ class MarketData:
 
         for d in missing:
             reason = ""
-            if d.weekday() >= 5:  # samedi ou dimanche
+            if d.weekday() >= 5:  # Saturday or Sunday
                 reason = "Weekend (market closed)"
             elif d in country_holidays:
                 reason = f"Public holiday: {country_holidays.get(d)}"
@@ -82,13 +82,13 @@ class MarketData:
                 reason = "Market closed (unexpected closure)"
                 inconsistent_count += 1
 
-            print(f" - {d.date()} → {reason}")
+            print(f" - {d.date()} - {reason}")
 
-        # Message final
+        # Final message
         if inconsistent_count == 0:
-            print("\nAll missing dates are consistent with the trading calendar ✅")
+            print("\nAll missing dates are consistent with the trading calendar")
         else:
-            print(f"\nWarning: {inconsistent_count} missing dates are inconsistent with the trading calendar ❌")
+            print(f"\nWarning: {inconsistent_count} missing dates are inconsistent with the trading calendar")
 
         print("--- End of verification ---\n")
 
