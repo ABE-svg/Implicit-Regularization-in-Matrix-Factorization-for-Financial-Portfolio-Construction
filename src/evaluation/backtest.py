@@ -8,5 +8,5 @@ def backtest(R_test, Sigma, ridge):
         "sharpe": sharpe(r),
         "vol": volatility(r),
         "max_dd": max_drawdown(r),
-        "weights": port.weights_
+        #"weights": port.weights_
     }
