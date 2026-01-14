@@ -2,17 +2,15 @@
 
 ## Overview
 
-This project investigates **implicit regularization** induced by gradient descent when estimating covariance matrices through **matrix factorization**, and its impact on **portfolio construction**.
+This project studies **implicit regularization** induced by gradient descent when estimating covariance matrices through **matrix factorization**, and its impact on **portfolio construction**.
 
 We consider the factorized parameterization:
 
-\[
-X = U U^\top
-\]
+    X = U U^T
 
-where \(X\) is a positive semi-definite covariance matrix and optimization is performed over the factor \(U\) using gradient descent **without explicit regularization**.
+where X is a positive semi-definite covariance matrix. Optimization is performed directly on the factor U using gradient descent **without explicit regularization**.
 
-The key question is:
+The central question of this project is:
 
 > How does the initialization of gradient descent affect the complexity of the learned covariance matrix and the resulting portfolio performance?
 
@@ -21,10 +19,10 @@ The key question is:
 ## Objectives
 
 - Compare **sample covariance** with **factorized covariance estimators**
-- Study implicit regularization via:
+- Study implicit regularization through:
   - **Tiny initialization** (strong implicit regularization)
   - **Big initialization** (weak implicit regularization)
-- Evaluate economic performance using:
+- Evaluate portfolio performance using:
   - Sharpe ratio
   - Volatility
   - Maximum drawdown
@@ -35,31 +33,37 @@ The key question is:
 ## Methodology
 
 ### Data
-- Daily asset prices downloaded using `yfinance`
-- Log-returns computed and split into:
+
+- Daily asset prices are downloaded using `yfinance`
+- Log-returns are computed and split into:
   - Training period (covariance estimation)
   - Test period (portfolio evaluation)
 
+---
+
 ### Covariance Estimation
 
-We compare three covariance estimators:
+Three covariance estimators are considered:
 
-1. **Sample covariance**
-2. **Factorized GD (tiny init)**  
-   Small initialization of \(U\), inducing strong implicit regularization and low nuclear norm solutions
-3. **Factorized GD (big init)**  
-   Large initialization of \(U\), leading to weak implicit regularization and higher-complexity solutions
+1. **Sample covariance**  
+   The empirical covariance matrix computed directly from training returns.
+
+2. **Factorized Gradient Descent (Tiny initialization)**  
+   The factor matrix U is initialized with very small norm.  
+   This induces **strong implicit regularization**, leading to low-complexity covariance matrices.
+
+3. **Factorized Gradient Descent (Big initialization)**  
+   The factor matrix U is initialized with large norm.  
+   This results in **weak implicit regularization** and high-complexity covariance estimates.
 
 ---
 
 ### Portfolio Construction
 
-For each covariance matrix, we construct a **minimum-variance portfolio with ridge regularization**:
+For each covariance matrix, a **minimum-variance portfolio with ridge regularization** is constructed:
 
-\[
-\min_w \; w^\top \Sigma w + \lambda \|w\|^2
-\quad \text{s.t. } \mathbf{1}^\top w = 1
-\]
+    minimize    w^T Σ w + λ ||w||^2
+    subject to  sum(w) = 1
 
 ---
 
@@ -67,10 +71,10 @@ For each covariance matrix, we construct a **minimum-variance portfolio with rid
 
 All metrics are computed **out-of-sample** on the test period:
 
-- Sharpe ratio
-- Volatility
-- Maximum drawdown
-- Cumulative wealth
+- **Sharpe ratio**: mean portfolio return divided by its standard deviation
+- **Volatility**: standard deviation of portfolio returns
+- **Maximum drawdown**: worst peak-to-trough loss
+- **Cumulative wealth**: compounded portfolio value over time
 
 ---
 
@@ -86,17 +90,17 @@ Saved in `assets/results/performance_table.csv`
 | Factorized GD (tiny init) | 0.0568 | 0.0058 | -9.6% |
 | Factorized GD (big init) | 0.0613 | 0.0162 | -25.3% |
 
-Tiny initialization leads to **significantly lower drawdowns and more stable portfolios**.
+Tiny initialization leads to **more stable portfolios and substantially lower drawdowns**.
 
 ---
 
-### Cumulative Wealth
+### Cumulative Wealth (Test Period)
 
 Saved in `assets/img/wealth_test.png`
 
 - Sample covariance produces smooth but conservative growth
 - Tiny initialization yields stable growth with controlled downside risk
-- Big initialization leads to high volatility and large crashes
+- Big initialization exhibits high volatility and large crashes
 
 ---
 
@@ -104,8 +108,8 @@ Saved in `assets/img/wealth_test.png`
 
 Saved in `assets/img/drawdown_test.png`
 
-- Big initialization exhibits drawdowns exceeding **25%**
-- Tiny initialization substantially reduces downside risk
+- Big initialization leads to drawdowns exceeding **25%**
+- Tiny initialization significantly reduces downside risk
 - Sample covariance remains stable but conservative
 
 ---
@@ -114,14 +118,10 @@ Saved in `assets/img/drawdown_test.png`
 
 Saved in `assets/img/trace_X.png`
 
-The trace of the covariance matrix equals its nuclear norm for PSD matrices:
+The trace of the covariance matrix measures its complexity.
 
-\[
-\text{trace}(X) = \|X\|_*
-\]
-
-- Tiny initialization → very low nuclear norm
-- Big initialization → high nuclear norm plateau
+- Tiny initialization → very low trace (low nuclear norm)
+- Big initialization → high trace plateau
 
 This provides direct evidence of **implicit regularization induced by gradient descent**.
 
@@ -129,13 +129,13 @@ This provides direct evidence of **implicit regularization induced by gradient d
 
 ### Spectral Analysis
 
-- **Singular values of \(U\)** (`assets/img/spectrum_U.png`)
-  - Tiny init → fast decay
-  - Big init → many active directions
+- **Singular values of U** (`assets/img/spectrum_U.png`)
+  - Tiny initialization → fast decay
+  - Big initialization → many active directions
 
-- **Eigenvalues of \(X\)** (`assets/img/spectrum_X.png`)
-  - Tiny init → low-rank covariance structure
-  - Big init → noisy, high-rank covariance
+- **Eigenvalues of X** (`assets/img/spectrum_X.png`)
+  - Tiny initialization → low-rank covariance structure
+  - Big initialization → noisy, high-rank covariance
 
 ---
 
@@ -158,3 +158,8 @@ This provides direct evidence of **implicit regularization induced by gradient d
 ├── notebooks/
 ├── requirements.txt
 └── README.md
+
+## Installation and execution 
+
+pip install -r requirements.txt
+python -m app.app
