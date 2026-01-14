@@ -8,20 +8,20 @@ class Config:
     "EFA","EWJ","EWG","EWU","EWC","EWH","EWT","EWZ","INDA","FXI",
 
     # ===== Bond & Defensive ETFs =====
-    "TLT","IEF","SHY","BND","AGG","LQD","HYG","TIP","MUB","EMB",
-    "VGIT","VCSH","VCIT","BSV","JPST","ICSH","GLDM","SLV","USO","UNG",
+    "TLT","IEF","SHY","BND","AGG","LQD","HYG","TIP","MUB",
+    "VGIT","VCSH","VCIT","BSV","JPST","ICSH","GLDM","SLV","USO",
 
     # ===== Sector ETFs =====
     "XLF","XLK","XLE","XLY","XLP","XLV","XLI","XLB","XLU","XLRE",
     "SMH","SOXX","KRE","XBI","IBB","ITA","IYR","XRT","FDN","ARKK",
 
     # ===== Mega-cap Tech =====
-    "AAPL","MSFT","AMZN","GOOGL","GOOG","META","NVDA","TSLA","AVGO","ORCL",
+    "MSFT","AMZN","GOOGL","GOOG","META","NVDA","AVGO","ORCL",
     "ADBE","CRM","INTC","AMD","CSCO","QCOM","TXN","IBM","NOW","SNOW",
 
     # ===== Financials =====
-    "JPM","BAC","WFC","C","GS","MS","BLK","SCHW","AXP","USB",
-    "PNC","TFC","COF","BK","STT","AIG","ALL","MET","PRU","TRV",
+    "JPM","BAC","WFC","C","GS","MS","BLK","SCHW","AXP",
+    "PNC","TFC","COF","BK","STT","ALL","PRU","TRV",
 
     # ===== Healthcare =====
     "JNJ","UNH","PFE","MRK","ABBV","LLY","BMY","AMGN","GILD","CVS",
@@ -29,16 +29,17 @@ class Config:
 
     # ===== Consumer & Retail =====
     "WMT","COST","TGT","HD","LOW","MCD","SBUX","NKE","DIS","NFLX",
-    "KO","PEP","PM","MO","CL","PG","EL","KMB","GIS","KHC",
+    "KO","PEP","MO","CL","PG","EL","KMB","GIS","KHC",
 
     # ===== Industrials =====
-    "CAT","DE","BA","GE","HON","LMT","RTX","UPS","FDX","UNP",
+    "CAT","DE","BA","GE","HON","LMT","RTX","UPS","FDX",
     "CSX","NSC","MMM","EMR","ETN","ITW","PH","ROK","CMI","PCAR",
 
     # ===== Energy & Materials =====
-    "XOM","CVX","COP","SLB","EOG","PSX","MPC","VLO","OXY","KMI",
-    "BHP","RIO","FCX","NEM","AA","LIN","APD","SHW","DOW","DD"
+    "XOM","CVX","COP","SLB","EOG","VLO","OXY","KMI",
+    "BHP","RIO","FCX","NEM","AA","APD","SHW","DOW","DD"
     )
+
 
     start = "2019-01-01"
     end = "2024-01-01"
