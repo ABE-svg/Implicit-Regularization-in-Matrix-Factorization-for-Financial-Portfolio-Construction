@@ -138,6 +138,11 @@ This provides direct evidence of **implicit regularization induced by gradient d
   - Big initialization → noisy, high-rank covariance
 
 ---
+## Installation and execution 
+
+pip install -r requirements.txt
+python -m app.app
+---
 
 ## Project Structure
 
@@ -158,8 +163,3 @@ This provides direct evidence of **implicit regularization induced by gradient d
 ├── notebooks/
 ├── requirements.txt
 └── README.md
-
-## Installation and execution 
-
-pip install -r requirements.txt
-python -m app.app
