@@ -140,8 +140,8 @@ This provides direct evidence of **implicit regularization induced by gradient d
 ---
 ## Installation and execution 
 
-pip install -r requirements.txt
-python -m app.app
+        pip install -r requirements.txt
+        python -m app.app
 
 ---
 
