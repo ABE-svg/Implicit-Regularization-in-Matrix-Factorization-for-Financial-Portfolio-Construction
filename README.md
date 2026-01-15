@@ -123,7 +123,7 @@ The trace of the covariance matrix measures its complexity.
 - Tiny initialization → very low trace (low nuclear norm)
 - Big initialization → high trace plateau
 
-This provides direct evidence of **implicit regularization induced by gradient descent**.
+This provides direct empirical evidence of **implicit regularization induced by gradient descent**.
 
 ---
 
@@ -138,29 +138,50 @@ This provides direct evidence of **implicit regularization induced by gradient d
   - Big initialization → noisy, high-rank covariance
 
 ---
-## Installation and execution 
 
-        pip install -r requirements.txt
-        python -m app.app
+## Interpretation and Link with the Reference Article
+
+The reference article shows that, when optimizing a matrix through a factorized parameterization using gradient descent, the optimization problem admits **multiple global minima**. In this setting, the algorithm is implicitly biased toward solutions of **lower nuclear norm** when the factor matrix is initialized close to zero and optimized with a small step size.
+
+This project empirically confirms this phenomenon in a **financial portfolio construction setting**:
+
+- **Tiny initialization** consistently leads to covariance matrices with:
+  - lower trace and faster spectral decay,
+  - effectively lower rank,
+  - improved out-of-sample stability.
+
+- **Big initialization**, although reaching a global minimum of the training objective, converges to higher-complexity covariance matrices that:
+  - overfit training noise,
+  - produce unstable portfolios,
+  - suffer from large drawdowns out-of-sample.
+
+While the theoretical guarantees of the article are derived under idealized optimization regimes, the results obtained here provide strong empirical evidence that the same **implicit regularization mechanism** operates in realistic financial data settings. This highlights the practical importance of initialization choices when using factorized covariance models in portfolio construction.
 
 ---
 
-## Project Structure
+## Installation and Execution
 
-```text
-.
-├── app/
-│   └── app.py
-├── src/
-│   ├── algorithms/
-│   ├── etl/
-│   ├── models/
-│   ├── operators/
-│   ├── evaluation/
-│   └── plots/
-├── assets/
-│   ├── img/
-│   └── results/
-├── notebooks/
-├── requirements.txt
-└── README.md
+```bash
+    pip install -r requirements.txt
+    python -m app.app
+
+---
+
+## Project structure
+
+    .
+    ├── app/
+    │   └── app.py
+    ├── src/
+    │   ├── algorithms/
+    │   ├── etl/
+    │   ├── models/
+    │   ├── operators/
+    │   ├── evaluation/
+    │   └── plots/
+    ├── assets/
+    │   ├── img/
+    │   └── results/
+    ├── notebooks/
+    ├── requirements.txt
+    └── README.md
