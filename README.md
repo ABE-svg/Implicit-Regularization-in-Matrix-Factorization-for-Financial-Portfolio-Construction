@@ -161,7 +161,6 @@ While the theoretical guarantees of the article are derived under idealized opti
 
 ## Installation and Execution
 
-```bash
     pip install -r requirements.txt
     python -m app.app
 
