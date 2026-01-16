@@ -62,7 +62,7 @@ Three covariance estimators are considered:
 
 For each covariance matrix, a **minimum-variance portfolio with ridge regularization** is constructed:
 
-    minimize    w^T Σ w + λ ||w||^2
+    minimize    w^T Σ w 
     subject to  sum(w) = 1
 
 ---
@@ -79,6 +79,7 @@ All metrics are computed **out-of-sample** on the test period:
 ---
 
 ## Results
+Note: The code was written by the authors for this project, with generative AI used as a helper for code structuring and debugging.
 
 ### Performance Summary
 
@@ -86,11 +87,12 @@ Saved in `assets/results/performance_table.csv`
 
 | Method | Sharpe | Volatility | Max Drawdown |
 |------|------|------|------|
-| Sample covariance | 0.3149 | 0.0006 | -0.4% |
-| Factorized GD (tiny init) | 0.0568 | 0.0058 | -9.6% |
-| Factorized GD (big init) | 0.0613 | 0.0162 | -25.3% |
+| Sample covariance | highest | lowest | smallest |
+| Factorized GD (tiny init) | negative | higher | large |
+| Factorized GD (big init) | most negative | very high | severe |
 
-Tiny initialization leads to **more stable portfolios and substantially lower drawdowns**.
+Across rolling windows, the **sample covariance estimator produces the most stable and best-performing portfolios**.
+Factorized estimators exhibit clear structural differences but do not outperform the classical baseline in finite samples.
 
 ---
 
@@ -98,9 +100,9 @@ Tiny initialization leads to **more stable portfolios and substantially lower dr
 
 Saved in `assets/img/wealth_test.png`
 
-- Sample covariance produces smooth but conservative growth
-- Tiny initialization yields stable growth with controlled downside risk
-- Big initialization exhibits high volatility and large crashes
+- Sample covariance produces smooth and stable growth
+- Tiny initialization leads to large fluctuations and negative risk-adjusted performance
+- Big initialization exhibits extreme volatility and large crashes
 
 ---
 
@@ -108,9 +110,9 @@ Saved in `assets/img/wealth_test.png`
 
 Saved in `assets/img/drawdown_test.png`
 
-- Big initialization leads to drawdowns exceeding **25%**
-- Tiny initialization significantly reduces downside risk
-- Sample covariance remains stable but conservative
+- Big initialization results in deep and persistent drawdowns
+- Tiny initialization reduces drawdown severity relative to big initialization
+- Sample covariance remains the most conservative estimator
 
 ---
 
@@ -120,7 +122,7 @@ Saved in `assets/img/trace_X.png`
 
 The trace of the covariance matrix measures its complexity.
 
-- Tiny initialization → very low trace (low nuclear norm)
+- Tiny initialization → very low trace (low effective complexity)
 - Big initialization → high trace plateau
 
 This provides direct empirical evidence of **implicit regularization induced by gradient descent**.
@@ -129,33 +131,34 @@ This provides direct empirical evidence of **implicit regularization induced by 
 
 ### Spectral Analysis
 
-- **Singular values of U** (`assets/img/spectrum_U.png`)
-  - Tiny initialization → fast decay
+- **Singular values of U** (`assets/img/spectrum_U_tiny_big.png`)
+  - Tiny initialization → fast spectral decay
   - Big initialization → many active directions
 
-- **Eigenvalues of X** (`assets/img/spectrum_X.png`)
-  - Tiny initialization → low-rank covariance structure
-  - Big initialization → noisy, high-rank covariance
+- **Eigenvalues of X** (`assets/img/spectrum_X_sample_tiny_big.png`)
+  - Tiny initialization → low effective rank
+  - Big initialization → noisy, high-rank structure
 
 ---
 
 ## Interpretation and Link with the Reference Article
 
-The reference article shows that, when optimizing a matrix through a factorized parameterization using gradient descent, the optimization problem admits **multiple global minima**. In this setting, the algorithm is implicitly biased toward solutions of **lower nuclear norm** when the factor matrix is initialized close to zero and optimized with a small step size.
+The reference article shows that, when optimizing a matrix through a factorized parameterization using gradient descent, the optimization problem admits **multiple global minima**. In this setting, the algorithm is implicitly biased toward solutions of **lower nuclear norm** when initialized close to zero.
 
-This project empirically confirms this phenomenon in a **financial portfolio construction setting**:
+This project empirically confirms this mechanism in a **financial portfolio construction setting**:
 
-- **Tiny initialization** consistently leads to covariance matrices with:
-  - lower trace and faster spectral decay,
-  - effectively lower rank,
-  - improved out-of-sample stability.
+- Tiny initialization consistently produces covariance matrices with:
+  - lower trace,
+  - faster spectral decay,
+  - lower effective rank.
 
-- **Big initialization**, although reaching a global minimum of the training objective, converges to higher-complexity covariance matrices that:
+- Big initialization converges to higher-complexity solutions that:
   - overfit training noise,
   - produce unstable portfolios,
-  - suffer from large drawdowns out-of-sample.
+  - suffer from severe drawdowns out-of-sample.
 
-While the theoretical guarantees of the article are derived under idealized optimization regimes, the results obtained here provide strong empirical evidence that the same **implicit regularization mechanism** operates in realistic financial data settings. This highlights the practical importance of initialization choices when using factorized covariance models in portfolio construction.
+
+While implicit regularization clearly affects covariance structure, it **does not automatically translate into improved portfolio performance** in finite samples. The sample covariance baseline remains highly competitive in this empirical setting.
 
 ---
 
@@ -166,7 +169,7 @@ While the theoretical guarantees of the article are derived under idealized opti
 
 ---
 
-**NB**: The execution takes approximately 4 minutes before displaying the results.
+**NB**: The execution takes approximately 4 minutes before displaying the results on a standard laptop.
 
 ---
 
