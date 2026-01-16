@@ -46,20 +46,21 @@ class Config:
     test_size = 252
     T_train = 252
     T_test  = 63
-    step    = 21
+    step    = 63         
+
 
     mask_frac = 0.30
     include_diag = True
     seed = 42
 
     lr = 1e-3
-    n_steps = 40_000
-    log_every = 2000
+    n_steps = 300        
+    log_every = 50
 
     init_scale_tiny = 1e-4
     init_scale_big = 1e-1
 
-    m_portfolios = None   # set in code as 5*N or 10*N
+    m_portfolios = None   # set in code as 2*N or 10*N
     w_kind = "l2"         # or "simplex"
 
     ridge = 0.0   # main experiment: no explicit regularization on weights
