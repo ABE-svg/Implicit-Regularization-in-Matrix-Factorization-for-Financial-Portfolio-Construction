@@ -166,6 +166,10 @@ While the theoretical guarantees of the article are derived under idealized opti
 
 ---
 
+**NB**: The execution takes approximately 4 minutes before displaying the results.
+
+---
+
 ## Project structure
 
     .
