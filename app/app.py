@@ -1,9 +1,13 @@
 import os
+from matplotlib.image import resample
 import pandas as pd
 
+from src.etl.utils import rolling_windows
 from src.config import Config
 from src.etl.utils import download_prices_yfinance, log_returns, train_test_split
 from src.operators.entry_mask import EntryMaskOperator
+from src.operators.portfolio_variance import PortfolioVarianceOperator
+from src.models.covariance import SampleCovariance, FactorizedGDPortfolioVarCovariance
 from src.algorithms.optimize import FactorizedGD
 from src.models.covariance import SampleCovariance, FactorizedGDCovariance
 from src.evaluation.backtest import backtest
@@ -20,31 +24,34 @@ def main():
 
     # 1) Data
     prices = download_prices_yfinance(cfg.tickers, cfg.start, cfg.end)
+    # Print the shape of the prices matrix
+    print("Shape of prices matrix:", prices.shape)
     returns = log_returns(prices)
-    R_train, R_test = train_test_split(returns, cfg.test_size)
+    results = {"sample": [], "tiny": [], "big": []}
 
-    # 2) Operator A(X)
-    A = EntryMaskOperator.random(len(cfg.tickers), cfg.mask_frac, cfg.seed)
+    for R_train, R_test in rolling_windows(returns, cfg.T_train, cfg.T_test, cfg.step):
+        n = len(cfg.tickers)
+        m = 5 * n   # or 10*n
+        A = PortfolioVarianceOperator.random(n=n, m=m, seed=cfg.seed, kind=cfg.w_kind)
+        # A = EntryMaskOperator.random(len(cfg.tickers), cfg.mask_frac, cfg.seed, include_diag=cfg.include_diag)
 
-    # 3) Covariance estimates
-    Sigma_sample = SampleCovariance().fit(R_train.values).covariance_
+        Sigma_sample = SampleCovariance().fit(R_train.values).covariance_
 
-    gd_tiny = FactorizedGD(cfg.lr, cfg.n_steps, cfg.init_scale_tiny, cfg.seed, cfg.log_every)
-    gd_big  = FactorizedGD(cfg.lr, cfg.n_steps, cfg.init_scale_big,  cfg.seed, cfg.log_every)
+        gd_tiny = FactorizedGD(cfg.lr, cfg.n_steps, cfg.init_scale_tiny, cfg.seed, cfg.log_every)
+        gd_big  = FactorizedGD(cfg.lr, cfg.n_steps, cfg.init_scale_big,  cfg.seed, cfg.log_every)
+        est_tiny = FactorizedGDPortfolioVarCovariance(A, gd_tiny).fit(R_train.values)
+        est_big  = FactorizedGDPortfolioVarCovariance(A, gd_big).fit(R_train.values)
+        # est_tiny = FactorizedGDCovariance(A, gd_tiny).fit(R_train.values)
+        # est_big  = FactorizedGDCovariance(A, gd_big).fit(R_train.values)
 
-    est_tiny = FactorizedGDCovariance(A, gd_tiny).fit(R_train.values)
-    est_big  = FactorizedGDCovariance(A, gd_big).fit(R_train.values)
-
-    # 4) Backtests
-    res_sample = backtest(R_test.values, Sigma_sample, cfg.ridge)
-    res_tiny   = backtest(R_test.values, est_tiny.covariance_, cfg.ridge)
-    res_big    = backtest(R_test.values, est_big.covariance_,  cfg.ridge)
-
-    # 5) Save results table
+        results["sample"].append(backtest(R_test.values, Sigma_sample, cfg.ridge))
+        results["tiny"].append(backtest(R_test.values, est_tiny.covariance_, cfg.ridge))
+        results["big"].append(backtest(R_test.values, est_big.covariance_, cfg.ridge))
+        # 5) Save results table
     table = pd.DataFrame([
-        {"Method": "Sample covariance", "Sharpe": res_sample["sharpe"], "Vol": res_sample["vol"], "MaxDD": res_sample["max_dd"]},
-        {"Method": "Factorized GD (tiny init)  [implicit reg]", "Sharpe": res_tiny["sharpe"], "Vol": res_tiny["vol"], "MaxDD": res_tiny["max_dd"]},
-        {"Method": "Factorized GD (big init)   [weak reg]", "Sharpe": res_big["sharpe"], "Vol": res_big["vol"], "MaxDD": res_big["max_dd"]},
+        {"Method": "Sample covariance", "Sharpe": resample["sharpe"], "Vol": resample["vol"], "MaxDD": resample["max_dd"]},
+        {"Method": "Factorized GD (tiny init)  [implicit reg]", "Sharpe": est_tiny["sharpe"], "Vol": est_tiny["vol"], "MaxDD": est_tiny["max_dd"]},
+        {"Method": "Factorized GD (big init)   [weak reg]", "Sharpe": est_big["sharpe"], "Vol": est_big["vol"], "MaxDD": est_big["max_dd"]},
     ])
 
     table_path = "assets/results/performance_table.csv"
@@ -55,9 +62,9 @@ def main():
     # 6) Save weights table
     weights_df = pd.DataFrame({
         "ticker": cfg.tickers,
-        "w_sample": res_sample["weights"],
-        "w_tiny": res_tiny["weights"],
-        "w_big": res_big["weights"],
+        "w_sample": resample["weights"],
+        "w_tiny": est_tiny["weights"],
+        "w_big": est_big["weights"],
     })
     weights_path = "assets/results/weights_table.csv"
     weights_df.to_csv(weights_path, index=False)
@@ -74,15 +81,15 @@ def main():
                     filename="spectrum_U_tiny_big.png")
 
     plot_cumulative_wealth({
-        "Sample": res_sample["wealth"],
-        "Tiny init": res_tiny["wealth"],
-        "Big init": res_big["wealth"],
+        "Sample": resample["wealth"],
+        "Tiny init": est_tiny["wealth"],
+        "Big init": est_big["wealth"],
     }, filename="cumulative_wealth.png")
 
     plot_drawdown({
-        "Sample": res_sample["drawdown"],
-        "Tiny init": res_tiny["drawdown"],
-        "Big init": res_big["drawdown"],
+        "Sample": resample["drawdown"],
+        "Tiny init": est_tiny["drawdown"],
+        "Big init": est_big["drawdown"],
     }, filename="drawdown.png")
 
 if __name__ == "__main__":

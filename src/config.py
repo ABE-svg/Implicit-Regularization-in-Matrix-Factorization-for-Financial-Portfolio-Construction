@@ -44,6 +44,9 @@ class Config:
     start = "2019-01-01"
     end = "2024-01-01"
     test_size = 252
+    T_train = 252
+    T_test  = 63
+    step    = 21
 
     mask_frac = 0.30
     include_diag = True
@@ -56,4 +59,8 @@ class Config:
     init_scale_tiny = 1e-4
     init_scale_big = 1e-1
 
-    ridge = 1e-6
+    m_portfolios = None   # set in code as 5*N or 10*N
+    w_kind = "l2"         # or "simplex"
+
+    ridge = 0.0   # main experiment: no explicit regularization on weights
+
